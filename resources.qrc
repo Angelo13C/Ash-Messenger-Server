@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/SSL">
+        <file>resources/SSL/server.crt</file>
+        <file>resources/SSL/server.csr</file>
+        <file>resources/SSL/server.key</file>
+    </qresource>
+    <qresource prefix="/DATABASE">
+        <file>resources/Database/credentials.txt</file>
+        <file>resources/Database/defaultTables.sql</file>
+    </qresource>
+    <qresource prefix="/CONFIG">
+        <file>resources/Config/config.json</file>
+    </qresource>
+</RCC>

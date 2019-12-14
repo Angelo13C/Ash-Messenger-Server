@@ -1,1 +1,5 @@
 resources/Database/credentials.txt
+.qmake.stash
+Ash_Messenger_Server.pro.user
+Makefile
+/build/*

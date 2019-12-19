@@ -20,13 +20,15 @@ class SslConnection : public QObject
 {
     Q_OBJECT
 public:
-    explicit SslConnection(QObject *parent = nullptr);
+    explicit SslConnection(QObject *parent = nullptr, QString connectionPoolName = "");
     ~SslConnection();
 
     void setSocket(qintptr descriptor);
     QSslSocket *getSocket();
 
 private:
+    QString _connectionPoolName;
+
     QSslSocket *_socket;
 
     QString _cachedPacket = "";

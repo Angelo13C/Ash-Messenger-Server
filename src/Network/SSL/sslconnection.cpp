@@ -1,6 +1,7 @@
 #include "sslconnection.h"
 
-SslConnection::SslConnection(QObject *parent) : QObject(parent)
+SslConnection::SslConnection(QObject *parent, QString connectionPoolName)
+    : QObject(parent), _connectionPoolName(connectionPoolName)
 {
 
 }
@@ -13,11 +14,24 @@ SslConnection::~SslConnection()
     delete _receiver;
 }
 
+//Get the dtpa sender of the connection
+DTPASender *SslConnection::getSender()
+{
+    return _sender;
+}
+
+//Get the current socket
+QSslSocket *SslConnection::getSocket()
+{
+    return _socket;
+}
+
 //When a client connects
 void SslConnection::onConnect()
 {
-    if(!sender()) return;
-    std::cout << this << " connected " << getSocket() << std::endl;
+    if(!sender())
+        return;
+    qDebug() << _connectionPoolName << objectName() << " connected ";
 
     emit connected();           //emit the signal to be handled by the pool
 }
@@ -25,11 +39,140 @@ void SslConnection::onConnect()
 //When a client disconnects
 void SslConnection::onDisconnect()
 {
-    if(!sender()) return;
-    std::cout << this << " disconnected " << getSocket() << std::endl;
+    if(!sender())
+        return;
+    qDebug() << _connectionPoolName << objectName() << " disconnected ";
 
     ConnectionsManager::removeConnection(_socket);
     emit disconnected();        //emit the signal to be handled by the pool
+}
+
+//When the connection receive a message
+void SslConnection::onReadyRead()
+{
+    if(!sender())
+        return;
+
+    qDebug() << _connectionPoolName << objectName() << " readyRead ";
+
+    QString packet = readSocket();
+
+    if(packet != "")
+    {
+        QList<DTPARequest> requests = DTPAReceiver::packetToRequests(packet);
+
+        for(int i = 0; i < requests.length(); i++)
+        {
+            DTPARequest request = DTPARequest(requests.at(i));
+            _receiver->addToCachedRequests(request);
+        }
+    }
+}
+
+//When the server writes something
+void SslConnection::onBytesWritten(qint64 bytes)
+{
+    if(!sender()) return;
+        qDebug() << _connectionPoolName << objectName() << " number of bytes written " << bytes;
+}
+
+//When the socket changes state
+void SslConnection::onStateChanged(QAbstractSocket::SocketState socketState)
+{
+    if(!sender()) return;
+        qDebug() << _connectionPoolName << objectName() << " state " << socketState;
+}
+
+//When the socket has an error
+void SslConnection::onError(QAbstractSocket::SocketError socketError)
+{
+    if(!sender()) return;
+        qDebug() << _connectionPoolName << objectName() << " socketError " << socketError;
+}
+
+//When the socket has an error (ssl)
+void SslConnection::onSslError(QList<QSslError> socketErrors)
+{
+    if(!sender())
+        return;
+
+    foreach(QSslError error, socketErrors)
+    {
+        qDebug() << _connectionPoolName << objectName() << " socketSslError " << error.errorString();
+    }
+}
+
+//Setup the current socket and connections
+void SslConnection::setSocket(qintptr descriptor)
+{
+    _socket = new QSslSocket(this);
+
+    connect(_socket, &QSslSocket::connected, this, &SslConnection::onConnect);
+    connect(_socket, &QSslSocket::disconnected, this, &SslConnection::onDisconnect);
+    connect(_socket, &QSslSocket::readyRead, this, &SslConnection::onReadyRead);
+    connect(_socket, &QSslSocket::bytesWritten, this, &SslConnection::onBytesWritten);
+    connect(_socket, &QSslSocket::stateChanged, this, &SslConnection::onStateChanged);
+    connect(_socket, static_cast<void(QSslSocket::*)(QAbstractSocket::SocketError)>(&QSslSocket::error), this, &SslConnection::onError);
+
+    _socket->setSocketDescriptor(descriptor);
+
+    setupSsl(_socket);
+
+    //Set the dtpa sender of the connection
+    _sender = new DTPASender(nullptr, _socket);
+    _receiver = new DTPAReceiver(_sender);
+}
+
+//Setup the SSL part
+void SslConnection::setupSsl(QSslSocket *socket)
+{
+    socket->setProtocol(QSsl::TlsV1_0);
+
+    QByteArray key;
+    QByteArray cert;
+
+    QFile file_key(":SSL/resources/SSL/server.key");
+    if(file_key.open(QIODevice::ReadOnly))
+    {
+        key = file_key.readAll();
+        file_key.close();
+    }
+    else
+    {
+        qDebug() << file_key.errorString();
+    }
+
+    QFile file_cert(":SSL/resources/SSL/server.crt");
+    if(file_cert.open(QIODevice::ReadOnly))
+    {
+        cert = file_cert.readAll();
+        file_cert.close();
+    }
+    else
+    {
+        qDebug() << file_cert.errorString();
+    }
+
+
+    QSslKey ssl_key(key, QSsl::Rsa);
+
+    QSslCertificate ssl_cert(cert);
+
+    socket->addCaCertificate(ssl_cert);
+    socket->setLocalCertificate(ssl_cert);
+    socket->setPrivateKey(ssl_key);
+
+
+    connect(socket, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(onSslError(QList<QSslError>)));
+
+    socket->setSocketOption(QAbstractSocket::KeepAliveOption, true );
+
+    socket->startServerEncryption();
+
+    if(!socket->waitForEncrypted()) {
+        std::cout << "Wait for encrypted error!" << std::endl;
+        return;
+    }
 }
 
 //Read the socket and get the packet
@@ -94,149 +237,4 @@ QString SslConnection::readSocket()
     }
 
     return packet;
-}
-
-//When the connection receive a message
-void SslConnection::onReadyRead()
-{
-    if(!sender()) return;
-    std::cout << std::endl << this << " readyRead " << getSocket() << std::endl;
-
-    QString packet = readSocket();
-
-    if(packet != "")
-    {
-        QList<DTPARequest> requests = DTPAReceiver::packetToRequests(packet);
-
-        for(int i = 0; i < requests.length(); i++)
-        {
-            DTPARequest request = DTPARequest(requests.at(i));
-            _receiver->addToCachedRequests(request);
-        }
-    }
-}
-
-
-//When the server writes something
-void SslConnection::onBytesWritten(qint64 bytes)
-{
-    if(!sender()) return;
-    std::cout << this << " bytesWritten " << getSocket() << " number of bytes " << bytes << std::endl;
-
-}
-
-//When the socket changes state
-void SslConnection::onStateChanged(QAbstractSocket::SocketState socketState)
-{
-    if(!sender()) return;
-    std::cout << this << " bytesWritten " << getSocket() << " state " << socketState << std::endl;
-
-}
-
-//When the socket has an error
-void SslConnection::onError(QAbstractSocket::SocketError socketError)
-{
-    if(!sender()) return;
-    std::cout << this << getSocket() << " socketError " << socketError << std::endl;
-
-}
-
-//When the socket has an error (ssl)
-void SslConnection::onSslError(QList<QSslError> socketErrors)
-{
-    if(!sender()) return;
-
-    foreach(QSslError error, socketErrors)
-    {
-        std::cout << this << getSocket() << " socketSslError " << error.errorString().toStdString() << std::endl;
-
-    }
-}
-
-//Get the current socket
-QSslSocket *SslConnection::getSocket()
-{
-    if(!sender()) return nullptr;
-    return static_cast<QSslSocket*>(sender());
-}
-
-//Setup the current socket and connections
-void SslConnection::setSocket(qintptr descriptor)
-{
-    _socket = new QSslSocket(this);
-
-    _socket->setSocketDescriptor(descriptor);
-
-    setupSsl(_socket);
-
-    //Set the dtpa sender of the connection
-    _sender = new DTPASender(nullptr, _socket);
-    _receiver = new DTPAReceiver(_sender);
-
-    connect(_socket, &QSslSocket::connected, this, &SslConnection::onConnect);
-    connect(_socket, &QSslSocket::disconnected, this, &SslConnection::onDisconnect);
-    connect(_socket, &QSslSocket::readyRead, this, &SslConnection::onReadyRead);
-    connect(_socket, &QSslSocket::bytesWritten, this, &SslConnection::onBytesWritten);
-    connect(_socket, &QSslSocket::stateChanged, this, &SslConnection::onStateChanged);
-    connect(_socket, static_cast<void(QSslSocket::*)(QAbstractSocket::SocketError)>(&QSslSocket::error), this, &SslConnection::onError);
-
-
-}
-
-//Setup the SSL part
-void SslConnection::setupSsl(QSslSocket *socket)
-{
-    socket->setProtocol(QSsl::TlsV1_0);
-
-    QByteArray key;
-    QByteArray cert;
-
-    QFile file_key(":SSL/resources/SSL/server.key");
-    if(file_key.open(QIODevice::ReadOnly))
-    {
-        key = file_key.readAll();
-        file_key.close();
-    }
-    else
-    {
-        qDebug() << file_key.errorString();
-    }
-
-    QFile file_cert(":SSL/resources/SSL/server.crt");
-    if(file_cert.open(QIODevice::ReadOnly))
-    {
-        cert = file_cert.readAll();
-        file_cert.close();
-    }
-    else
-    {
-        qDebug() << file_cert.errorString();
-    }
-
-
-    QSslKey ssl_key(key, QSsl::Rsa);
-
-    QSslCertificate ssl_cert(cert);
-
-    socket->addCaCertificate(ssl_cert);
-    socket->setLocalCertificate(ssl_cert);
-    socket->setPrivateKey(ssl_key);
-
-
-    connect(socket, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(onSslError(QList<QSslError>)));
-
-    socket->setSocketOption(QAbstractSocket::KeepAliveOption, true );
-
-    socket->startServerEncryption();
-
-    if(!socket->waitForEncrypted()) {
-        std::cout << "Wait for encrypted error!" << std::endl;
-        return;
-    }
-}
-
-//Get the dtpa sender of the connection
-DTPASender *SslConnection::getSender()
-{
-    return _sender;
 }

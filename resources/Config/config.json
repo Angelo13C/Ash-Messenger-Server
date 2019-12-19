@@ -1,7 +1,8 @@
 {
-    "networking":
+    "network":
     {
-        "port" : "4000"
+        "port" : "4000",
+        "priority" : "5"
     },
 
     "database":

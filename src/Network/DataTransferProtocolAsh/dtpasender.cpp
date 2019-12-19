@@ -120,8 +120,6 @@ void DTPASender::sendPacket()
 {
     QString packet = getPacketFromQueue();
 
-    qDebug() << "packet length: " << packet.length();
-
     //Send packet with socket
     _socket->write(packet.toUtf8());
 }

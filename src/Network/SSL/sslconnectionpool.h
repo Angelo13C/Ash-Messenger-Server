@@ -14,9 +14,10 @@ class SslConnectionPool : public QObject, public QRunnable
 public:
     explicit SslConnectionPool(QObject *parent = nullptr);
 
-    int connectionCount();
-
+    void initialize(QThread *thread);
     void run() override;
+
+    int connectionCount();
 
 public slots:
     void connectionPending(qintptr descriptor, SslConnectionPool *pool);

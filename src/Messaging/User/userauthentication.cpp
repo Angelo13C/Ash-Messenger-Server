@@ -79,9 +79,11 @@ void UserAuthentication::loginEmail(DTPASender *sender, DTPARequest *request, bo
         QString password = request->getForms().at(1).getValue();
 
         //Get the user with the specified email and password
-        QVector<QStringList> result = Database::executeBinded("SELECT * FROM users_email "
-                "WHERE email = ? AND password_hash = ?;", QStringList() << email << password);
+        //QVector<QStringList> result = Database::executeBinded("SELECT * FROM users_email "
+        //        "WHERE email = ? AND password_hash = ?;", QStringList() << email << password);
 
+        QVector<QStringList> result;
+        result.append(QStringList() << "301");
         DTPARequest loginResult(DTPARequest::Command::LOGIN_USER_EMAIL_RESULT, DTPARequest::Priority::HIGH);
 
         //If there is a user with that email and password
@@ -91,7 +93,6 @@ void UserAuthentication::loginEmail(DTPASender *sender, DTPARequest *request, bo
             loginResult.addNewForm(&userID);
 
             ConnectionsManager::addConnection(sender->getSocket(), userID.toInt());
-            qDebug() << "User ID: " << userID;
         }
         else    //Login failed
         {

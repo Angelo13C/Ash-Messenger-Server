@@ -1,5 +1,7 @@
 #include "dtpasenderpool.h"
 
+#include <QCoreApplication>
+
 DTPASenderPool::DTPASenderPool(QObject *parent) : QObject(parent)
 {
 }

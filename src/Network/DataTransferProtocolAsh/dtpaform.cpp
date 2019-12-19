@@ -1,5 +1,7 @@
 #include "dtpaform.h"
 
+#include "dtpa.h"
+
 DTPAForm::DTPAForm(QString value, bool isComplete)
 {
     setComplete(isComplete);

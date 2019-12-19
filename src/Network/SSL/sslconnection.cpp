@@ -1,5 +1,9 @@
 #include "sslconnection.h"
 
+#include "src/Network/connectionsmanager.h"
+
+#include <QSslKey>
+
 SslConnection::SslConnection(QObject *parent, QString connectionPoolName)
     : QObject(parent), _connectionPoolName(connectionPoolName)
 {
@@ -170,7 +174,7 @@ void SslConnection::setupSsl(QSslSocket *socket)
     socket->startServerEncryption();
 
     if(!socket->waitForEncrypted()) {
-        std::cout << "Wait for encrypted error!" << std::endl;
+        qDebug() << "Wait for encrypted error!";
         return;
     }
 }

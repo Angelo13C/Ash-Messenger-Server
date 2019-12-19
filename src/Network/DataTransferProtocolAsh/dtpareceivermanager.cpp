@@ -1,5 +1,7 @@
 #include "dtpareceivermanager.h"
 
+#include "dtpa.h"
+
 DTPAReceiverManager::DTPAReceiverManager()
 {
 

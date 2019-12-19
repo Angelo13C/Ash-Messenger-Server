@@ -1,10 +1,8 @@
 #pragma once
+
 #include <QTcpServer>
-#include <QThreadPool>
 
 #include "src/Network/SSL/sslconnectionpool.h"
-
-#include "src/Other/config.h"
 
 #define SERVER_ADDRESS_TOLISTEN QHostAddress::Any
 

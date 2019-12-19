@@ -1,5 +1,10 @@
 #include "chatsystem.h"
 
+#include "src/Network/DataTransferProtocolAsh/dtpareceivermanager.h"
+
+#include "src/Network/connectionsmanager.h"
+
+#include "src/Database/database.h"
 
 void ChatSystem::initialize()
 {

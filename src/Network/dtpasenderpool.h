@@ -1,11 +1,9 @@
 #pragma once
 
-#include <QObject>
-#include <QThread>
 #include <QRunnable>
 #include <QSslSocket>
 
-#include"DataTransferProtocolAsh/dtpasender.h"
+#include "DataTransferProtocolAsh/dtpasender.h"
 
 class DTPASenderPool : public QObject, public QRunnable
 {

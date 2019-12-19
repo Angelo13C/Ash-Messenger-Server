@@ -1,5 +1,11 @@
 #include "userauthentication.h"
 
+#include "src/Network/DataTransferProtocolAsh/dtpareceivermanager.h"
+
+#include "src/Database/database.h"
+
+#include "src/Network/connectionsmanager.h"
+
 void UserAuthentication::initialize()
 {
     DTPAReceiverManager::getInstance()->signCommandFunction(DTPARequest::Command::REGISTER_USER_EMAIL, registerEmail);

@@ -1,6 +1,5 @@
 #include "connectionsmanager.h"
 
-
 //Add a socket to the manager and his id
 void ConnectionsManager::addConnection(QSslSocket *socket, int userID)
 {

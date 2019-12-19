@@ -1,20 +1,10 @@
 #pragma once
 
-#include <QObject>
-#include <QString>
-#include <QByteArray>
-
-#include <iostream>
-
 #include <QSslSocket>
-#include <QFile>
-#include <QSslKey>
 
 #include "src/Network/DataTransferProtocolAsh/dtparequest.h"
 #include "src/Network/DataTransferProtocolAsh/dtpareceiver.h"
 #include "src/Network/DataTransferProtocolAsh/dtpasender.h"
-
-#include "src/Network/connectionsmanager.h"
 
 class SslConnection : public QObject
 {

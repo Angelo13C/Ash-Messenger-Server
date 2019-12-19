@@ -1,8 +1,6 @@
 #pragma once
-#include <QByteArray>
-#include <QFile>
+
 #include <QJsonDocument>
-#include <QJsonObject>
 
 namespace Config
 {

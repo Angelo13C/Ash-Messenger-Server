@@ -1,5 +1,7 @@
 #include "config.h"
 
+#include <QJsonObject>
+
 //Initialize the config reading the config.json
 void Config::initialize()
 {

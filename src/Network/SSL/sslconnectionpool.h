@@ -1,9 +1,6 @@
 #pragma once
 
-#include <QObject>
-
-#include <QThread>
-#include <QMutex>
+#include <QEventLoop>
 
 #include "src/Network/SSL/sslconnection.h"
 #include "src/Network/dtpasenderpool.h"
@@ -27,7 +24,6 @@ public slots:
 
 private:
     QList<SslConnection*> _connections;
-    QMutex mutex;
 
     QEventLoop *loop;
 

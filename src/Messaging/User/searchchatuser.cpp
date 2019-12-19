@@ -1,5 +1,9 @@
 #include "searchchatuser.h"
 
+#include "src/Database/database.h"
+
+#include "src/Network/DataTransferProtocolAsh/dtpareceivermanager.h"
+
 //Initialize the namespace
 void SearchChatUser::initialize()
 {

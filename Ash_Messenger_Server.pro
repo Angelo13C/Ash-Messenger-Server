@@ -6,6 +6,11 @@ QT += network
 CONFIG += c++11 console
 CONFIG -= app_bundle
 
+CONFIG += precompile_header
+
+# Use Precompiled headers (PCH)
+PRECOMPILED_HEADER = src/pch.h
+
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -52,6 +57,8 @@ RCC_DIR = $$DESTDIR/.qrc
 UI_DIR = $$DESTDIR/.ui
 
 HEADERS += \
+    src/pch.h \
+    src/pch.h \
     src/Database/database.h \
     src/Messaging/Chat/chatsystem.h \
     src/Messaging/User/searchchatuser.h \

@@ -1,14 +1,7 @@
 #pragma once
-#include <iostream>
 
-#include "src/Network/DataTransferProtocolAsh/dtpa.h"
-#include "src/Network/DataTransferProtocolAsh/dtpareceivermanager.h"
-
-#include <QStringList>
-#include <QString>
-#include "src/Database/database.h"
-
-#include "src/Network/connectionsmanager.h"
+#include "src/Network/DataTransferProtocolAsh/dtpasender.h"
+#include "src/Network/DataTransferProtocolAsh/dtparequest.h"
 
 namespace UserAuthentication
 {

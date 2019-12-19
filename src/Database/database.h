@@ -1,10 +1,7 @@
 #pragma once
+
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlQuery>
-#include <QtSql/QSqlError>
-#include <QtSql/QSqlRecord>
-#include <QDebug>
-#include <QFile>
 
 #include "src/Other/config.h"
 

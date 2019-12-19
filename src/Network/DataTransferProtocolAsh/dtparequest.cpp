@@ -1,5 +1,7 @@
 #include "dtparequest.h"
 
+#include "dtpa.h"
+
 //Setup the request with all the values
 void DTPARequest::setup(Command command, QList<DTPAForm> forms, Priority priority, int16_t id)
 {

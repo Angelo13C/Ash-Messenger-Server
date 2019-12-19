@@ -1,7 +1,4 @@
 #pragma once
-#include <QString>
-
-#include "dtpa.h"
 
 class DTPAForm
 {

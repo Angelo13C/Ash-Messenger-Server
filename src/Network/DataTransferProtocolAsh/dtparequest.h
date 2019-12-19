@@ -1,6 +1,4 @@
 #pragma once
-#include <QList>
-#include <QDebug>
 
 #include "dtpaform.h"
 

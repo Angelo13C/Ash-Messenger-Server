@@ -2,13 +2,6 @@
 
 #include <QTcpSocket>
 
-#include <QEventLoop>
-#include <QRunnable>
-#include <QMutexLocker>
-#include <QReadWriteLock>
-
-#include <QList>
-
 SslConnectionPool::SslConnectionPool(QObject *parent) : QObject(parent)
 {
 
@@ -71,8 +64,6 @@ SslConnection* SslConnectionPool::addConnection(qintptr descriptor)
 //Get how many connection is the pool handling
 int SslConnectionPool::connectionCount()
 {
-    QMutexLocker locker(&mutex);
-
     int count = _connections.count();
     return count;
 }

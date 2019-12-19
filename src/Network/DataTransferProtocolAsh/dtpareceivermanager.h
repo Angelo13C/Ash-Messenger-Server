@@ -1,11 +1,7 @@
 #pragma once
 
-#include <QDebug>
-#include <QMap>
-
 #include <functional>
 
-#include "dtpa.h"
 #include "dtparequest.h"
 #include "dtpasender.h"
 

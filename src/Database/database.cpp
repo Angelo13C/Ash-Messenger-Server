@@ -1,5 +1,8 @@
 #include "database.h"
 
+#include <QtSql/QSqlError>
+#include <QtSql/QSqlRecord>
+
 void Database::initialize()
 {
     //If the database is open succesfully

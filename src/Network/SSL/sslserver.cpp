@@ -2,6 +2,8 @@
 
 #define RED "\033[1;31m"
 
+#include "src/Other/config.h"
+
 SslServer::SslServer()
 {
     qRegisterMetaType<qintptr>("qintptr");

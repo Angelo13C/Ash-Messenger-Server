@@ -1,5 +1,8 @@
 #include "dtpareceiver.h"
 
+#include "dtpaform.h"
+#include "dtpareceivermanager.h"
+
 //Setup the receiver
 DTPAReceiver::DTPAReceiver(DTPASender *connection)
     : _connection(connection)

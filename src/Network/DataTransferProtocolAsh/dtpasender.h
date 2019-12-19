@@ -1,8 +1,5 @@
 #pragma once
 
-#include <QCoreApplication>
-#include <QObject>
-
 #include <QSslSocket>
 
 #include "dtpa.h"

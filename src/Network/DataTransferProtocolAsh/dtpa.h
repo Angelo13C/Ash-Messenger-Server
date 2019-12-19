@@ -2,11 +2,6 @@
 
 #include <functional>
 
-#include <QVector>
-#include <QList>
-#include <QString>
-#include <QStringList>
-
 #define TOKEN_FRAGMENT_ID_SIZE 4       //Bytes (fragment's id token)
 #define TOKEN_CMDTKN_SIZE 4       //Bytes (command token)
 #define TOKEN_DATA_SIZE 4096 - 2 - TOKEN_CMDTKN_SIZE - TOKEN_FRAGMENT_ID_SIZE    //Bytes (data token) (2 is the size of the fragment_flag start and end)

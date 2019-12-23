@@ -4,17 +4,20 @@
 
 #include "Database/database.h"
 
-#include "src/Messaging/User/userauthentication.h"
-#include "src/Messaging/User/searchchatuser.h"
+#include "Messaging/User/userauthentication.h"
+#include "Messaging/User/searchchatuser.h"
+#include "Messaging/Chat/chatsystem.h"
 
-#include "src/Messaging/Chat/chatsystem.h"
-#include "src/Other/config.h"
+#include "Other/config.h"
+#include "Other/logger.h"
 
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
     Config::initialize();
+
+    Logger::initialize();
 
     Database::initialize();
     UserAuthentication::initialize();

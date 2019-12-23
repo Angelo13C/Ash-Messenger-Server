@@ -22,6 +22,20 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+# Default rules for deployment.
+qnx: target.path = /tmp/$${TARGET}/bin
+else: unix:!android: target.path = /opt/$${TARGET}/bin
+!isEmpty(target.path): INSTALLS += target
+
+release: DESTDIR = build/release
+debug:   DESTDIR = build/debug
+profile:   DESTDIR = build/profile
+
+OBJECTS_DIR = $$DESTDIR/.obj
+MOC_DIR = $$DESTDIR/.moc
+RCC_DIR = $$DESTDIR/.qrc
+UI_DIR = $$DESTDIR/.ui
+
 SOURCES += \
         src/Database/database.cpp \
         src/Messaging/Chat/chatsystem.cpp \
@@ -39,25 +53,12 @@ SOURCES += \
         src/Network/connectionsmanager.cpp \
         src/Network/dtpasenderpool.cpp \
         src/Other/config.cpp \
+        src/Other/logger.cpp \
         src/main.cpp \
         src/performancebenchmark.cpp
 
-# Default rules for deployment.
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
-
-release: DESTDIR = build/release
-debug:   DESTDIR = build/debug
-profile:   DESTDIR = build/profile
-
-OBJECTS_DIR = $$DESTDIR/.obj
-MOC_DIR = $$DESTDIR/.moc
-RCC_DIR = $$DESTDIR/.qrc
-UI_DIR = $$DESTDIR/.ui
-
 HEADERS += \
-    src/pch.h \
+    src/Other/logger.h \
     src/pch.h \
     src/Database/database.h \
     src/Messaging/Chat/chatsystem.h \

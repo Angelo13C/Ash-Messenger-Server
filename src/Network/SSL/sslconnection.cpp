@@ -48,8 +48,10 @@ void SslConnection::onConnect()
     QHostAddress address(_socket->peerAddress().toIPv4Address(&ok));
 
     qInfo().noquote() << _logPrefix << "connected";
-    qInfo().noquote().nospace() << _logPrefix << " address: " <<
-        address.toString() << ":" << _socket->peerPort();
+
+    if(ok)
+        qInfo().noquote().nospace() << _logPrefix << " address: " <<
+                    address.toString() << ":" << _socket->peerPort();
 
     emit connected();   //Emit the signal to be handled by the pool
 }

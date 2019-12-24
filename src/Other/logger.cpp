@@ -24,17 +24,19 @@ void Logger::messageHandler(QtMsgType type, const QMessageLogContext &context, c
     Q_UNUSED(context)
 
     QString logText = QDateTime::currentDateTime().toString(_timeFormat);
+
     if(type == QtDebugMsg)
-        logText += QString("Debug: %1").arg(msg);
+        logText += "Debug: ";
+    else if(type == QtInfoMsg)
+        logText += "Info: ";
+    else if(type == QtWarningMsg)
+        logText += "Warning: ";
+    else if(type == QtCriticalMsg)
+        logText += "Critical: ";
+    else if(type == QtFatalMsg)
+        logText += "Fatal: ";
 
-    if(type == QtWarningMsg)
-        logText += QString("Warning: %1").arg(msg);
-
-    if(type == QtCriticalMsg)
-        logText += QString("Critical: %1").arg(msg);
-
-    if(type == QtFatalMsg)
-        logText += QString("Fatal: %1").arg(msg);
+    logText += msg;
 
     //Output to the file (append)
     *_logStream << logText << endl;

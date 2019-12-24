@@ -15,4 +15,5 @@
 //Containers
 #include <QStringList>
 #include <QList>
+#include <QLinkedList>
 #include <QVector>

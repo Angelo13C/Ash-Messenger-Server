@@ -2,7 +2,8 @@
 
 #include <QTcpSocket>
 
-SslConnectionPool::SslConnectionPool(QObject *parent) : QObject(parent)
+SslConnectionPool::SslConnectionPool(QObject *parent, int id)
+    : QObject(parent), _logPrefix("Pool " + QString::number(id)), _id(id)
 {
 
 }
@@ -16,29 +17,29 @@ void SslConnectionPool::initialize(QThread *thread)
 //Run the pool
 void SslConnectionPool::run()
 {
-    qDebug() << this->objectName() << " running ";
+    qInfo().noquote() << _logPrefix << "running";
     _senderPool.run();
 
     loop = new QEventLoop();
     connect(this, &SslConnectionPool::quit, loop, &QEventLoop::quit);
     loop->exec();
 
-    qDebug() << "Connection Pool quitting";
+    qInfo().noquote() << _logPrefix << "quitting";
 }
-#include "src/performancebenchmark.h"   //DELETE
+
 //When a new connection is received
 void SslConnectionPool::connectionPending(qintptr descriptor, SslConnectionPool *pool)
 {
     if(pool != this)
         return;
 
-    qDebug() << "Accepting descriptor: " << descriptor;
+    qInfo().noquote() << _logPrefix << "accepting descriptor:" << descriptor;
 
     SslConnection *connection = addConnection(descriptor);
 
     if(!connection)
     {
-        qDebug() << "Can't add connection";
+        qInfo().noquote() << _logPrefix << "can't add connection";
         return;
     }
 }
@@ -46,7 +47,7 @@ void SslConnectionPool::connectionPending(qintptr descriptor, SslConnectionPool 
 //Add a new connection to the pool and setup that
 SslConnection* SslConnectionPool::addConnection(qintptr descriptor)
 {
-    SslConnection *connection = new SslConnection(nullptr, objectName());
+    SslConnection *connection = new SslConnection(nullptr, _id, getValidConnectionID());
     connection->setObjectName("Connection " + QString::number(_connections.size()));
 
     connection->setSocket(descriptor);
@@ -59,6 +60,26 @@ SslConnection* SslConnectionPool::addConnection(qintptr descriptor)
     _senderPool.addConnection(connection->getSender());
 
     return connection;
+}
+
+//Get a valid connection ID for the pool
+int SslConnectionPool::getValidConnectionID()
+{
+    int id = 0;
+
+    auto i = _connectionsID.begin();
+    //Cycle through all the connections ID already in use
+    for (; i!= _connectionsID.end(); i++)
+    {
+        if(*i == id)
+            id++;
+        else
+            break;
+    }
+
+    _connectionsID.insert(i, id);
+
+    return id;
 }
 
 //Get how many connection is the pool handling
@@ -76,7 +97,7 @@ void SslConnectionPool::connectionStarted()
     if (!connection)
         return;
 
-    qDebug() << this->objectName() << " connection started " << connection;
+    qInfo() << _logPrefix << "connection started" << connection->getID();
 }
 
 //When the connection is ended
@@ -84,15 +105,15 @@ void SslConnectionPool::connectionFinished()
 {
     SslConnection *connection = static_cast<SslConnection*>(sender());
 
-    qDebug() << this->objectName() << connection->objectName() << " finished ";
-
-    //Remove the connection from the sender pool
+    //Remove the connection from the pool
     _senderPool.removeConnection(connection->getSocket());
+    //Mark the ID of the disconnected connection as usable
+    _connectionsID.removeAll(connection->getID());
 
     //Remove connection from the list and delete the connection
     _connections.removeAll(connection);
     connection->deleteLater();
 
-    qDebug() << this->objectName() << connection->objectName() << " removed ";
+    qInfo().noquote() << _logPrefix << "has removed connection" << connection->getID();
 }
 

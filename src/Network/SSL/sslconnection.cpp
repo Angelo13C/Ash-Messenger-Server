@@ -3,9 +3,12 @@
 #include "src/Network/connectionsmanager.h"
 
 #include <QSslKey>
+#include <QHostAddress>
 
-SslConnection::SslConnection(QObject *parent, QString connectionPoolName)
-    : QObject(parent), _connectionPoolName(connectionPoolName)
+SslConnection::SslConnection(QObject *parent, int connectionPoolID, int connectionID)
+    : QObject(parent), _connectionPoolID(connectionPoolID), _connectionID(connectionID),
+      _logPrefix("Connection " + QString::number(connectionPoolID)
+                 + "-" + QString::number(connectionID))
 {
 
 }
@@ -24,6 +27,11 @@ DTPASender *SslConnection::getSender()
     return _sender;
 }
 
+int SslConnection::getID()
+{
+    return _connectionID;
+}
+
 //Get the current socket
 QSslSocket *SslConnection::getSocket()
 {
@@ -35,9 +43,15 @@ void SslConnection::onConnect()
 {
     if(!sender())
         return;
-    qDebug() << _connectionPoolName << objectName() << " connected ";
 
-    emit connected();           //emit the signal to be handled by the pool
+    bool ok;
+    QHostAddress address(_socket->peerAddress().toIPv4Address(&ok));
+
+    qInfo().noquote() << _logPrefix << "connected";
+    qInfo().noquote().nospace() << _logPrefix << " address: " <<
+        address.toString() << ":" << _socket->peerPort();
+
+    emit connected();   //Emit the signal to be handled by the pool
 }
 
 //When a client disconnects
@@ -45,7 +59,7 @@ void SslConnection::onDisconnect()
 {
     if(!sender())
         return;
-    qDebug() << _connectionPoolName << objectName() << " disconnected ";
+    qInfo().noquote() << _logPrefix << "disconnected";
 
     ConnectionsManager::removeConnection(_socket);
     emit disconnected();        //emit the signal to be handled by the pool
@@ -57,7 +71,7 @@ void SslConnection::onReadyRead()
     if(!sender())
         return;
 
-    qDebug() << _connectionPoolName << objectName() << " readyRead ";
+    qInfo().noquote() << _logPrefix << "readyRead";
 
     QString packet = readSocket();
 
@@ -76,22 +90,28 @@ void SslConnection::onReadyRead()
 //When the server writes something
 void SslConnection::onBytesWritten(qint64 bytes)
 {
-    if(!sender()) return;
-        qDebug() << _connectionPoolName << objectName() << " number of bytes written " << bytes;
+    if(!sender())
+        return;
+
+    qInfo().noquote() << _logPrefix << "number of bytes written" << bytes;
 }
 
 //When the socket changes state
 void SslConnection::onStateChanged(QAbstractSocket::SocketState socketState)
 {
-    if(!sender()) return;
-        qDebug() << _connectionPoolName << objectName() << " state " << socketState;
+    if(!sender())
+        return;
+
+    qInfo().noquote() << _logPrefix << "state" << socketState;
 }
 
 //When the socket has an error
 void SslConnection::onError(QAbstractSocket::SocketError socketError)
 {
-    if(!sender()) return;
-        qDebug() << _connectionPoolName << objectName() << " socketError " << socketError;
+    if(!sender())
+        return;
+
+    qInfo().noquote() << _logPrefix << "socketError" << socketError;
 }
 
 //When the socket has an error (ssl)
@@ -100,9 +120,9 @@ void SslConnection::onSslError(QList<QSslError> socketErrors)
     if(!sender())
         return;
 
-    foreach(QSslError error, socketErrors)
+    for(QSslError error : socketErrors)
     {
-        qDebug() << _connectionPoolName << objectName() << " socketSslError " << error.errorString();
+        qInfo().noquote() << _logPrefix << "socketSslError" << error.errorString();
     }
 }
 
@@ -119,6 +139,9 @@ void SslConnection::setSocket(qintptr descriptor)
     connect(_socket, static_cast<void(QSslSocket::*)(QAbstractSocket::SocketError)>(&QSslSocket::error), this, &SslConnection::onError);
 
     _socket->setSocketDescriptor(descriptor);
+
+    //Connected is not emitted normally, it's bugged
+    emit _socket->connected();
 
     setupSsl(_socket);
 
@@ -143,7 +166,7 @@ void SslConnection::setupSsl(QSslSocket *socket)
     }
     else
     {
-        qDebug() << file_key.errorString();
+        qCritical().noquote() << file_key.errorString();
     }
 
     QFile file_cert(":SSL/resources/SSL/server.crt");
@@ -154,7 +177,7 @@ void SslConnection::setupSsl(QSslSocket *socket)
     }
     else
     {
-        qDebug() << file_cert.errorString();
+        qCritical().noquote() << file_cert.errorString();
     }
 
 
@@ -174,7 +197,7 @@ void SslConnection::setupSsl(QSslSocket *socket)
     socket->startServerEncryption();
 
     if(!socket->waitForEncrypted()) {
-        qDebug() << "Wait for encrypted error!";
+        qCritical().noquote() << "Wait for encrypted error!";
         return;
     }
 }

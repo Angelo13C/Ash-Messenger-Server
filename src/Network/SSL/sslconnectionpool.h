@@ -9,7 +9,7 @@ class SslConnectionPool : public QObject, public QRunnable
 {
     Q_OBJECT
 public:
-    explicit SslConnectionPool(QObject *parent = nullptr);
+    explicit SslConnectionPool(QObject *parent = nullptr, int id = -1);
 
     void initialize(QThread *thread);
     void run() override;
@@ -27,9 +27,16 @@ private:
 
     QEventLoop *loop;
 
-    SslConnection* addConnection(qintptr descriptor);
+    QString _logPrefix;
+    int _id;
 
     DTPASenderPool _senderPool;
+    SslConnection* addConnection(qintptr descriptor);
+
+private:
+    QLinkedList<int> _connectionsID;
+
+    int getValidConnectionID();
 
 signals:
     void quit();

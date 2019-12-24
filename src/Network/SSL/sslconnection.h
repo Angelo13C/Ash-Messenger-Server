@@ -10,14 +10,16 @@ class SslConnection : public QObject
 {
     Q_OBJECT
 public:
-    explicit SslConnection(QObject *parent = nullptr, QString connectionPoolName = "");
+    explicit SslConnection(QObject *parent = nullptr, int connectionPoolID = -1, int connectionID = -1);
     ~SslConnection();
 
     void setSocket(qintptr descriptor);
     QSslSocket *getSocket();
 
 private:
-    QString _connectionPoolName;
+    int _connectionPoolID;
+    int _connectionID;
+    QString _logPrefix;
 
     QSslSocket *_socket;
 
@@ -33,6 +35,7 @@ private:
 
 public:
     DTPASender *getSender();
+    int getID();
 
 signals:
     void connected();

@@ -11,6 +11,12 @@ CONFIG += precompile_header
 # Use Precompiled headers (PCH)
 PRECOMPILED_HEADER = src/pch.h
 
+TEMPLATE = app
+CONFIG += cmdline
+
+# Application name
+TARGET = Ash_Server
+
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -27,9 +33,9 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-release: DESTDIR = build/release
-debug:   DESTDIR = build/debug
-profile:   DESTDIR = build/profile
+release: DESTDIR = release
+debug:   DESTDIR = debug
+profile:   DESTDIR = profile
 
 OBJECTS_DIR = $$DESTDIR/.obj
 MOC_DIR = $$DESTDIR/.moc

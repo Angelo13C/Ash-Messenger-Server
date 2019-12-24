@@ -1,7 +1,5 @@
 #include "sslserver.h"
 
-#define RED "\033[1;31m"
-
 #include "src/Other/config.h"
 
 SslServer::SslServer()
@@ -20,12 +18,11 @@ void SslServer::start(const QHostAddress &address, quint16 port)
     if(port == 0)   //If no port is given, get the config one
         port = Config::readValue("network/port").toUShort();
 
-    qDebug() << "Starting server!";
+    qInfo() << "Starting server!";
 
     if(!listen(address, port))
     {
-        qDebug() << RED << "Can't listen into the specified port!";
-        return;
+        qFatal("Can't listen into the specified port!");
     }
 
     int threadCount = -1;
@@ -34,11 +31,11 @@ void SslServer::start(const QHostAddress &address, quint16 port)
         threadCount = QThread::idealThreadCount();
 
     else if(threadCount < 2)
-        qDebug() << RED << "Can't run a pool on only" << threadCount << "threads";
+        qWarning() << "Can't run a pool on only" << threadCount << "threads";
 
     for(int8_t i = 0; i < (threadCount - _otherThreadCount) / 2; i++)
     {
-        SslServer::createPool("Pool " + QString::number(i));
+        SslServer::createPool(i);
     }
 
 }
@@ -46,7 +43,7 @@ void SslServer::start(const QHostAddress &address, quint16 port)
 //Stop the server
 void SslServer::stop()
 {
-    qWarning() << RED << "Stopping server!";
+    qCritical() << "Stopping server!";
     for(SslConnectionPool *pool : _pools)
     {
         deletePool(pool);
@@ -55,13 +52,13 @@ void SslServer::stop()
 }
 
 //Create a new connection pool
-void SslServer::createPool(QString id)
+void SslServer::createPool(int id)
 {
-    SslConnectionPool* pool = new SslConnectionPool();
+    SslConnectionPool* pool = new SslConnectionPool(nullptr, id);
     QThread *thread = new QThread;
 
-    pool->setObjectName(id);
-    thread->setObjectName(id);
+    pool->setObjectName("Pool " + QString::number(id));
+    thread->setObjectName("Pool " + QString::number(id));
 
     pool->initialize(thread);
     pool->moveToThread(thread);
@@ -102,7 +99,7 @@ void SslServer::incomingConnection(qintptr descriptor)
     SslConnectionPool* selectedPool = nullptr;
 
     //Select the pool with less connections
-    foreach(SslConnectionPool* pool, _pools)
+    for(SslConnectionPool* pool : _pools)
     {
         if(!selectedPool)
             selectedPool = pool;

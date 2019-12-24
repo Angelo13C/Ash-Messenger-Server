@@ -24,7 +24,7 @@ private:
 
     static constexpr int _otherThreadCount = 1;
 
-    void createPool(QString id);
+    void createPool(int id);
     void addPool(SslConnectionPool *pool);
     void deletePool(SslConnectionPool *pool);
 

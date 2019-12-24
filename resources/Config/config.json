@@ -8,7 +8,9 @@
     {
         "host" : "localhost",
         "port" : "5432",
-        "name" : "ashdb"
+        "name" : "ashdb",
+
+        "credentialsPath" : ":/DATABASE/resources/Database/credentials.txt"
     },
     "logger":
     {

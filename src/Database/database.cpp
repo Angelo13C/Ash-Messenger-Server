@@ -13,12 +13,13 @@ void Database::initialize()
 //Get the credentials to access the database from the file
 void Database::getCredentials(QString *username, QString *password)
 {
+    QString credentialsFilePath = Config::readValue("database/credentialsPath");
     //Get the credentials to access the database from the file
-    QFile credentialsFile(":/DATABASE/resources/Database/credentials.txt");
+    QFile credentialsFile(credentialsFilePath);
 
     if(!credentialsFile.open(QIODevice::ReadOnly))
     {
-        qDebug() << "Can't open credentials.txt for the database!";
+        qCritical() << "Can't open credentials for the database!";
         return;
     }
 
@@ -56,7 +57,7 @@ bool Database::openDatabase()
 
     if(!ok)
     {
-        qDebug() << "Can't open database!";
+        qCritical() << "Can't open database!";
     }
 
     return ok;
@@ -73,8 +74,8 @@ QVector<QStringList> Database::queryResults(QSqlQuery *query)
     //If there's been an error while executing the query
     if(_db.lastError().type() != QSqlError::NoError)
     {
-        qDebug() << "LOCALDB ERROR: " << _db.lastError();
-        qDebug() << query->lastQuery();
+        qWarning() << "LOCALDB ERROR: " << _db.lastError();
+        qWarning() << query->lastQuery();
     }
 
     //Get the rows of the result of the query
@@ -121,7 +122,7 @@ void Database::setupDefaultTables()
 
     if(!defaultTables.open(QIODevice::ReadOnly))
     {
-        qDebug() << "Can't open defaultTables.txt for the database!";
+        qCritical() << "Can't open defaultTables.txt for the database!";
         return;
     }
 
